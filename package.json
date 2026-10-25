@@ -1,0 +1,25 @@
+{
+  "name": "sistem-nilai-zero-trust",
+  "version": "1.0.0",
+  "description": "Tugas Praktikum Zero Trust Security - API Gateway (PEP) + Service Nilai + Service Transkrip",
+  "main": "start-all.js",
+  "scripts": {
+    "seed": "node db/seed.js",
+    "start": "node start-all.js",
+    "gateway": "node gateway/index.js",
+    "nilai": "node nilai-service/index.js",
+    "transkrip": "node transkrip-service/index.js",
+    "test": "node tests/run-tests.js",
+    "audit": "node db/show-audit.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "12.6.2",
+    "express": "^4.22.3",
+    "http-proxy-middleware": "^3.0.10",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}

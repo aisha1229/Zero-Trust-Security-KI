@@ -1,0 +1,53 @@
+# Menjalankan seluruh sistem: docker compose up --build
+# Database SQLite ada di named volume "nilai-data" (dipakai bersama semua container).
+services:
+  seed:                       # satu kali jalan: membuat tabel + data awal
+    build: .
+    image: sistem-nilai-zero-trust
+    command: ["node", "db/seed.js"]
+    volumes:
+      - nilai-data:/app/data
+
+  nilai:
+    image: sistem-nilai-zero-trust
+    command: ["node", "nilai-service/index.js"]
+    environment:
+      GATEWAY_URL: http://gateway:3000
+    volumes:
+      - nilai-data:/app/data
+    ports:
+      - "127.0.0.1:3001:3001"   # dibuka HANYA agar demo "akses langsung ditolak" bisa dicoba
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+  transkrip:
+    image: sistem-nilai-zero-trust
+    command: ["node", "transkrip-service/index.js"]
+    environment:
+      GATEWAY_URL: http://gateway:3000
+    volumes:
+      - nilai-data:/app/data
+    ports:
+      - "127.0.0.1:3002:3002"   # idem
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+  gateway:                    # satu-satunya pintu masuk (PEP)
+    image: sistem-nilai-zero-trust
+    command: ["node", "gateway/index.js"]
+    environment:
+      NILAI_URL: http://nilai:3001
+      TRANSKRIP_URL: http://transkrip:3002
+    volumes:
+      - nilai-data:/app/data
+      - ./config:/app/config    # policy.json (jam akses) bisa diubah dari host saat demo
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nilai
+      - transkrip
+
+volumes:
+  nilai-data:
